@@ -1,0 +1,2879 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>SCOLARIS WEB ADMIN - Gestion des sites et portails</title>
+    
+    <!-- Meta tags -->
+    <meta name="description" content="Interface d'administration des sites web SCOLARIS CI - Gérez tous vos portails : inscriptions, paiements, API, établissements, support">
+    <meta name="author" content="SCOLARIS CI - MENET/DESPS">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ===== VARIABLES GLOBALES ===== */
+        :root {
+            --blue-ci: #005A9C;
+            --blue-ci-dark: #004A7C;
+            --blue-ci-light: #E6F0F9;
+            --orange-ci: #F28B30;
+            --orange-ci-dark: #E07A20;
+            --orange-ci-light: #FFE8D6;
+            --green-ci: #009E60;
+            --green-ci-light: #E0F0E0;
+            --red: #DC3545;
+            --red-light: #FEE9EC;
+            --yellow: #FFC107;
+            --yellow-light: #FFF3CD;
+            --purple: #6B46C1;
+            --purple-light: #E9E0FF;
+            --teal: #00B8D9;
+            --teal-light: #E0F7FA;
+            --grey-dark: #343A40;
+            --grey: #6C757D;
+            --grey-light: #F8F9FA;
+            --border: 1px solid #E9ECEF;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.05);
+            --shadow: 0 5px 20px rgba(0,90,156,0.08);
+            --shadow-lg: 0 10px 30px rgba(242,139,48,0.12);
+            --border-radius: 12px;
+            --border-radius-sm: 8px;
+            --border-radius-lg: 20px;
+            --transition: all 0.25s ease;
+            
+            --sidebar-width: 300px;
+            --sidebar-collapsed-width: 80px;
+            --header-height: 70px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--grey-light);
+            color: var(--grey-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ===== LAYOUT ADMIN ===== */
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--blue-ci) 0%, #004A7C 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: var(--transition);
+            z-index: 1000;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .sidebar-logo-icon {
+            width: 48px;
+            height: 48px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--blue-ci);
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .sidebar-logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-logo-main {
+            font-weight: 800;
+            font-size: 1.3rem;
+            color: white;
+            letter-spacing: 1px;
+        }
+
+        .sidebar-logo-sub {
+            font-size: 0.65rem;
+            color: var(--orange-ci);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .sidebar-toggle {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .sidebar-toggle:hover {
+            background: var(--orange-ci);
+        }
+
+        .sidebar-user {
+            padding: 25px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .sidebar-user:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .sidebar-user-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--orange-ci);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .sidebar-user-info h4 {
+            color: white;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-user-info p {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.75rem;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: var(--transition);
+            margin: 4px 8px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+
+        .sidebar-nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .sidebar-nav-item.active {
+            background: var(--orange-ci);
+            color: white;
+        }
+
+        .sidebar-nav-item i {
+            width: 24px;
+            font-size: 1.1rem;
+            margin-right: 12px;
+        }
+
+        .sidebar-nav-item span {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .sidebar-nav-title {
+            padding: 20px 20px 10px;
+            color: rgba(255,255,255,0.5);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .sidebar.collapsed .sidebar-logo-text,
+        .sidebar.collapsed .sidebar-user-info,
+        .sidebar.collapsed .sidebar-nav-item span,
+        .sidebar.collapsed .sidebar-nav-title {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-nav-item i {
+            margin-right: 0;
+        }
+
+        .sidebar.collapsed .sidebar-nav-item {
+            justify-content: center;
+            padding: 12px;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: var(--transition);
+            min-height: 100vh;
+            background: var(--grey-light);
+        }
+
+        .main-content.expanded {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        /* ===== TOP BAR ADMIN ===== */
+        .admin-topbar {
+            height: var(--header-height);
+            background: white;
+            border-bottom: var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .admin-topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .admin-menu-toggle {
+            background: transparent;
+            border: none;
+            color: var(--grey-dark);
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: none;
+        }
+
+        .admin-search {
+            display: flex;
+            align-items: center;
+            background: var(--grey-light);
+            border-radius: 50px;
+            padding: 8px 20px;
+            width: 400px;
+            border: var(--border);
+            transition: var(--transition);
+        }
+
+        .admin-search:focus-within {
+            box-shadow: 0 0 0 3px rgba(242,139,48,0.1);
+            border-color: var(--orange-ci);
+        }
+
+        .admin-search i {
+            color: var(--grey);
+            margin-right: 10px;
+        }
+
+        .admin-search input {
+            border: none;
+            background: transparent;
+            outline: none;
+            width: 100%;
+            font-size: 0.9rem;
+        }
+
+        .admin-topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .admin-notification {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .admin-notification i {
+            font-size: 1.3rem;
+            color: var(--grey-dark);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background: var(--orange-ci);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 50px;
+            transition: var(--transition);
+        }
+
+        .admin-profile:hover {
+            background: var(--grey-light);
+        }
+
+        .admin-profile-avatar {
+            width: 45px;
+            height: 45px;
+            background: var(--blue-ci-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--blue-ci);
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .admin-profile-info h4 {
+            font-size: 0.95rem;
+            margin-bottom: 3px;
+        }
+
+        .admin-profile-info p {
+            font-size: 0.75rem;
+            color: var(--grey);
+        }
+
+        /* ===== PAGE CONTENT ===== */
+        .page-content {
+            padding: 30px;
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .page-content.hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== BREADCRUMB ===== */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: var(--grey);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .breadcrumb i {
+            color: var(--grey);
+            font-size: 0.8rem;
+        }
+
+        .breadcrumb span {
+            color: var(--blue-ci);
+            font-weight: 600;
+        }
+
+        /* ===== PAGE HEADER ===== */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            color: var(--blue-ci);
+        }
+
+        .page-header h1 i {
+            color: var(--orange-ci);
+            margin-right: 10px;
+        }
+
+        .page-header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        /* ===== BOUTONS ===== */
+        .btn-admin {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            gap: 10px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-admin-primary {
+            background: var(--orange-ci);
+            color: white;
+        }
+
+        .btn-admin-primary:hover {
+            background: var(--blue-ci);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-admin-outline {
+            background: transparent;
+            color: var(--blue-ci);
+            border: 2px solid var(--blue-ci);
+        }
+
+        .btn-admin-outline:hover {
+            background: var(--blue-ci);
+            color: white;
+        }
+
+        .btn-admin-danger {
+            background: var(--red);
+            color: white;
+        }
+
+        .btn-admin-danger:hover {
+            background: #BD2130;
+        }
+
+        .btn-admin-success {
+            background: var(--green-ci);
+            color: white;
+        }
+
+        .btn-admin-success:hover {
+            background: #007B4A;
+        }
+
+        .btn-admin-purple {
+            background: var(--purple);
+            color: white;
+        }
+
+        .btn-admin-purple:hover {
+            background: #5A3D9C;
+        }
+
+        .btn-admin-teal {
+            background: var(--teal);
+            color: white;
+        }
+
+        .btn-admin-teal:hover {
+            background: #0099B0;
+        }
+
+        /* ===== STATS CARDS ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            border: var(--border);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-5px);
+            border-color: var(--orange-ci);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--blue-ci-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: var(--blue-ci);
+        }
+
+        .stat-info h3 {
+            font-size: 0.9rem;
+            color: var(--grey);
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--blue-ci);
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+
+        .stat-trend {
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .trend-up {
+            color: var(--green-ci);
+        }
+
+        .trend-down {
+            color: var(--red);
+        }
+
+        /* ===== SITES GRID ===== */
+        .sites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .site-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            border: var(--border);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .site-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-5px);
+            border-color: var(--orange-ci);
+        }
+
+        .site-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 6px;
+            height: 100%;
+            background: var(--blue-ci);
+            transition: var(--transition);
+        }
+
+        .site-card:hover::before {
+            background: var(--orange-ci);
+        }
+
+        .site-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .site-icon {
+            width: 70px;
+            height: 70px;
+            background: var(--blue-ci-light);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--blue-ci);
+            transition: var(--transition);
+        }
+
+        .site-card:hover .site-icon {
+            background: var(--orange-ci-light);
+            color: var(--orange-ci);
+            transform: scale(1.05);
+        }
+
+        .site-info h3 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+            color: var(--blue-ci);
+        }
+
+        .site-url {
+            color: var(--grey);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .site-status {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-top: 10px;
+        }
+
+        .site-stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 25px 0;
+            padding: 20px 0;
+            border-top: var(--border);
+            border-bottom: var(--border);
+        }
+
+        .site-stat {
+            text-align: center;
+        }
+
+        .site-stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--blue-ci);
+            line-height: 1;
+        }
+
+        .site-stat-label {
+            font-size: 0.75rem;
+            color: var(--grey);
+            margin-top: 5px;
+        }
+
+        .site-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .site-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .site-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-production {
+            background: var(--green-ci-light);
+            color: var(--green-ci);
+        }
+
+        .badge-staging {
+            background: var(--yellow-light);
+            color: var(--yellow);
+        }
+
+        .badge-maintenance {
+            background: var(--red-light);
+            color: var(--red);
+        }
+
+        /* ===== FILTERS ===== */
+        .filters-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--grey-dark);
+        }
+
+        .filter-select {
+            padding: 10px 20px;
+            border: var(--border);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            color: var(--grey-dark);
+            background: white;
+            min-width: 200px;
+        }
+
+        .filter-btn {
+            background: var(--blue-ci-light);
+            color: var(--blue-ci);
+            padding: 10px 24px;
+            border-radius: 50px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-btn:hover {
+            background: var(--blue-ci);
+            color: white;
+        }
+
+        /* ===== TABLES ===== */
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            border: var(--border);
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--blue-ci);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 15px 10px;
+            color: var(--grey);
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-bottom: var(--border);
+        }
+
+        td {
+            padding: 15px 10px;
+            border-bottom: var(--border);
+            font-size: 0.95rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: var(--grey-light);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .status-active {
+            background: var(--green-ci-light);
+            color: var(--green-ci);
+        }
+
+        .status-inactive {
+            background: var(--red-light);
+            color: var(--red);
+        }
+
+        .status-maintenance {
+            background: var(--yellow-light);
+            color: var(--yellow);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .action-view {
+            background: var(--blue-ci);
+        }
+
+        .action-edit {
+            background: var(--orange-ci);
+        }
+
+        .action-delete {
+            background: var(--red);
+        }
+
+        .action-deploy {
+            background: var(--purple);
+        }
+
+        .action-backup {
+            background: var(--teal);
+        }
+
+        /* ===== DEPLOYMENT CARDS ===== */
+        .deployment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .deployment-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            border: var(--border);
+            transition: var(--transition);
+        }
+
+        .deployment-card:hover {
+            box-shadow: var(--shadow);
+            border-color: var(--orange-ci);
+        }
+
+        .deployment-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .deployment-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--purple-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--purple);
+        }
+
+        .deployment-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .deployment-date {
+            color: var(--grey);
+            font-size: 0.8rem;
+        }
+
+        .deployment-progress {
+            margin: 15px 0;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--grey-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--orange-ci);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.75rem;
+            color: var(--grey);
+        }
+
+        /* ===== DOMAINS CARDS ===== */
+        .domains-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .domain-card {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            border: var(--border);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .domain-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--teal-light);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: var(--teal);
+        }
+
+        .domain-info {
+            flex: 1;
+        }
+
+        .domain-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--blue-ci);
+            margin-bottom: 5px;
+        }
+
+        .domain-expiry {
+            font-size: 0.85rem;
+            color: var(--grey);
+        }
+
+        .domain-ssl {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--green-ci-light);
+            color: var(--green-ci);
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        /* ===== ANALYTICS CARDS ===== */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .analytics-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            border: var(--border);
+        }
+
+        .analytics-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .analytics-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--blue-ci);
+        }
+
+        .analytics-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--orange-ci);
+        }
+
+        .analytics-chart {
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            gap: 15px;
+        }
+
+        .chart-bar-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .chart-bar {
+            width: 100%;
+            background: var(--blue-ci-light);
+            border-radius: 8px 8px 0 0;
+            transition: var(--transition);
+            min-height: 5px;
+        }
+
+        .chart-bar:hover {
+            background: var(--orange-ci-light);
+        }
+
+        .chart-label {
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: var(--grey);
+        }
+
+        /* ===== MODALS ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 600px;
+            max-width: 95%;
+            padding: 40px;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            color: var(--blue-ci);
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--grey);
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            color: var(--red);
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        /* ===== FORMS ===== */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--blue-ci);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            border: var(--border);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            background: var(--grey-light);
+        }
+
+        .form-control:focus {
+            border-color: var(--orange-ci);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(242,139,48,0.1);
+            background: white;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        /* ===== TOAST NOTIFICATION ===== */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: white;
+            border-left: 4px solid var(--orange-ci);
+            border-radius: 12px;
+            padding: 16px 24px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 9998;
+            max-width: 450px;
+        }
+
+        .toast.active {
+            transform: translateX(0);
+        }
+
+        .toast-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--green-ci-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--green-ci);
+            font-size: 1.2rem;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 700;
+            color: var(--grey-dark);
+        }
+
+        .toast-message {
+            font-size: 0.85rem;
+            color: var(--grey);
+        }
+
+        /* ===== LOADING SPINNER ===== */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,90,156,0.1);
+            border-radius: 50%;
+            border-top-color: var(--blue-ci);
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1200px) {
+            .analytics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0 !important;
+            }
+            
+            .admin-menu-toggle {
+                display: block;
+            }
+            
+            .admin-search {
+                width: 250px;
+            }
+            
+            .sites-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-content {
+                padding: 20px;
+            }
+            
+            .admin-search {
+                display: none;
+            }
+            
+            .admin-profile-info {
+                display: none;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .page-header-actions {
+                width: 100%;
+            }
+            
+            .btn-admin {
+                flex: 1;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+            
+            .domains-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .filters-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+            
+            .site-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .site-stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .modal-content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ===== TOAST NOTIFICATION ===== -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <div class="toast-content">
+            <div class="toast-title" id="toastTitle">Succès</div>
+            <div class="toast-message" id="toastMessage">Action effectuée avec succès</div>
+        </div>
+    </div>
+
+    <!-- ===== MODALS ===== -->
+
+    <!-- MODAL AJOUT SITE -->
+    <div class="modal" id="modalAddSite">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Ajouter un site web</h3>
+                <button class="modal-close" onclick="closeModal('modalAddSite')">&times;</button>
+            </div>
+            <form id="formAddSite">
+                <div class="form-group">
+                    <label>Nom du site *</label>
+                    <input type="text" class="form-control" id="siteNom" placeholder="Ex: Portail inscriptions" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>URL du site *</label>
+                        <input type="url" class="form-control" id="siteUrl" placeholder="https://inscriptions.scolaris.ci" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Environnement *</label>
+                        <select class="form-control" id="siteEnvironnement">
+                            <option value="production">Production</option>
+                            <option value="staging">Staging</option>
+                            <option value="development">Développement</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Version</label>
+                        <input type="text" class="form-control" id="siteVersion" placeholder="v2.1.0">
+                    </div>
+                    <div class="form-group">
+                        <label>Technologie</label>
+                        <select class="form-control" id="siteTech">
+                            <option value="React">React</option>
+                            <option value="Vue.js">Vue.js</option>
+                            <option value="Angular">Angular</option>
+                            <option value="Laravel">Laravel</option>
+                            <option value="Django">Django</option>
+                            <option value="Node.js">Node.js</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea class="form-control" id="siteDescription" rows="3" placeholder="Description du site..."></textarea>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" id="siteActif" checked>
+                    <label for="siteActif">Activer le site immédiatement</label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-admin btn-admin-outline" onclick="closeModal('modalAddSite')">Annuler</button>
+                    <button type="submit" class="btn-admin btn-admin-primary">Ajouter le site</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIGURATION SITE -->
+    <div class="modal" id="modalSiteConfig">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Configuration du site</h3>
+                <button class="modal-close" onclick="closeModal('modalSiteConfig')">&times;</button>
+            </div>
+            <form id="formSiteConfig">
+                <div class="form-group">
+                    <label>Environnement</label>
+                    <select class="form-control" id="configEnvironnement">
+                        <option value="production">Production</option>
+                        <option value="staging">Staging</option>
+                        <option value="development">Développement</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Variables d'environnement</label>
+                    <textarea class="form-control" rows="4" id="configEnvVars">APP_NAME=SCOLARIS
+APP_ENV=production
+APP_DEBUG=false
+API_URL=https://api.scolaris.ci</textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cache (secondes)</label>
+                        <input type="number" class="form-control" id="configCache" value="3600">
+                    </div>
+                    <div class="form-group">
+                        <label>Session (minutes)</label>
+                        <input type="number" class="form-control" id="configSession" value="120">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Maintenance mode</label>
+                    <select class="form-control" id="configMaintenance">
+                        <option value="off">Désactivé</option>
+                        <option value="on">Activé</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-admin btn-admin-outline" onclick="closeModal('modalSiteConfig')">Annuler</button>
+                    <button type="submit" class="btn-admin btn-admin-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DÉPLOIEMENT -->
+    <div class="modal" id="modalDeploy">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Déployer une nouvelle version</h3>
+                <button class="modal-close" onclick="closeModal('modalDeploy')">&times;</button>
+            </div>
+            <form id="formDeploy">
+                <div class="form-group">
+                    <label>Site à déployer</label>
+                    <select class="form-control" id="deploySite">
+                        <option value="inscriptions">Portail inscriptions</option>
+                        <option value="paiements">Portail paiements</option>
+                        <option value="etablissements">Gestion établissements</option>
+                        <option value="api">API Gateway</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Version / Tag</label>
+                    <input type="text" class="form-control" id="deployVersion" placeholder="v2.1.5">
+                </div>
+                <div class="form-group">
+                    <label>Environnement cible</label>
+                    <select class="form-control" id="deployEnv">
+                        <option value="production">Production</option>
+                        <option value="staging">Staging</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Notes de version</label>
+                    <textarea class="form-control" rows="4" id="deployNotes" placeholder="Fonctionnalités ajoutées, bugs corrigés..."></textarea>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" id="deployBackup" checked>
+                    <label for="deployBackup">Créer une sauvegarde avant déploiement</label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-admin btn-admin-outline" onclick="closeModal('modalDeploy')">Annuler</button>
+                    <button type="submit" class="btn-admin btn-admin-primary">Déployer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL STATISTIQUES -->
+    <div class="modal" id="modalStats">
+        <div class="modal-content" style="width: 700px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Statistiques détaillées</h3>
+                <button class="modal-close" onclick="closeModal('modalStats')">&times;</button>
+            </div>
+            <div id="statsDetailsContent">
+                <!-- Contenu dynamique -->
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SAUVEGARDE -->
+    <div class="modal" id="modalBackup">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Créer une sauvegarde</h3>
+                <button class="modal-close" onclick="closeModal('modalBackup')">&times;</button>
+            </div>
+            <form id="formBackup">
+                <div class="form-group">
+                    <label>Site à sauvegarder</label>
+                    <select class="form-control" id="backupSite">
+                        <option value="all">Tous les sites</option>
+                        <option value="inscriptions">Portail inscriptions</option>
+                        <option value="paiements">Portail paiements</option>
+                        <option value="etablissements">Gestion établissements</option>
+                        <option value="api">API Gateway</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Inclure la base de données</label>
+                    <select class="form-control" id="backupDb">
+                        <option value="yes">Oui</option>
+                        <option value="no">Non</option>
+                    </select>
+                </div>
+                    <div class="form-group">
+                    <label>Inclure les fichiers</label>
+                    <select class="form-control" id="backupFiles">
+                        <option value="yes">Oui</option>
+                        <option value="no">Non</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <input type="text" class="form-control" id="backupDesc" placeholder="Sauvegarde pré-déploiement v2.1.5">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-admin btn-admin-outline" onclick="closeModal('modalBackup')">Annuler</button>
+                    <button type="submit" class="btn-admin btn-admin-primary">Lancer la sauvegarde</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMATION SUPPRESSION -->
+    <div class="modal" id="modalDeleteConfirm">
+        <div class="modal-content" style="width: 450px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirmer la suppression</h3>
+                <button class="modal-close" onclick="closeModal('modalDeleteConfirm')">&times;</button>
+            </div>
+            <div style="text-align: center; padding: 20px 0;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--red); margin-bottom: 20px;"></i>
+                <p id="deleteMessage" style="margin-bottom: 20px; font-size: 1.1rem;">Êtes-vous sûr de vouloir supprimer ce site ?</p>
+                <p style="font-size: 0.9rem; color: var(--grey);">Cette action est irréversible et supprimera toutes les données associées.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-admin btn-admin-outline" onclick="closeModal('modalDeleteConfirm')">Annuler</button>
+                <button type="button" class="btn-admin btn-admin-danger" id="confirmDeleteBtn">Supprimer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ADMIN CONTAINER ===== -->
+    <div class="admin-container">
+        <!-- ===== SIDEBAR ===== -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="sidebar-logo" onclick="showPage('dashboard'); return false;">
+                    <div class="sidebar-logo-icon">🌐</div>
+                    <div class="sidebar-logo-text">
+                        <span class="sidebar-logo-main">SCOLARIS</span>
+                        <span class="sidebar-logo-sub">WEB ADMIN</span>
+                    </div>
+                </a>
+                <button class="sidebar-toggle" id="sidebarToggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-user" onclick="showPage('profile');">
+                <div class="sidebar-user-avatar">KJ</div>
+                <div class="sidebar-user-info">
+                    <h4>Kouamé Jean</h4>
+                    <p>Webmaster • MENET</p>
+                </div>
+            </div>
+
+            <div class="sidebar-nav">
+                <div class="sidebar-nav-title">TABLEAU DE BORD</div>
+                <a href="#" class="sidebar-nav-item active" onclick="showPage('dashboard'); return false;" data-page="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+
+                <div class="sidebar-nav-title">SITES & PORTAILS</div>
+                <a href="#" class="sidebar-nav-item" onclick="showPage('sites'); return false;" data-page="sites">
+                    <i class="fas fa-globe"></i>
+                    <span>Tous les sites</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" onclick="showPage('inscriptions'); return false;" data-page="inscriptions">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Portail inscriptions</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" onclick="showPage('paiements'); return false;" data-page="paiements">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Portail paiements</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" onclick="showPage('etablissements'); return false;" data-page="etablissements">
+                    <i class="fas fa-school"></i>
+                    <span>Gestion établissements</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" onclick="showPage('api'); return false;" data-page="api">
+                    <i class="fas fa-plug"></i>
+                    <span>API Gateway</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" onclick="showPage('admin'); return false;" data-page="admin">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Interface admin</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" onclick="showPage('support'); return false;" data-page="support">
+                    <i class="fas fa-headset"></i>
+                    <span>Portail support</span>
+                </a>
+
+                <div class="sidebar-nav-title">DÉPLOIEMENT</div>
+                <a href="#" class="sidebar-nav-item" onclick="showPage('deploiement'); return false;" data-page="deploiement">
+                    <i class="fas fa-rocket"></i>
+                    <span>Déploiements</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" onclick="showPage('backups'); return false;" data-page="backups">
+                    <i class="fas fa-database"></i>
+                    <span>Sauvegardes</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" onclick="showPage('domaines'); return false;" data-page="domaines">
+                    <i class="fas fa-globe-africa"></i>
+                    <span>Domaines & SSL</span>
+                </a>
+
+                <div class="sidebar-nav-title">ANALYTICS</div>
+                <a href="#" class="sidebar-nav-item" onclick="showPage('trafic'); return false;" data-page="trafic">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Trafic & performance</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" onclick="showPage('logs'); return false;" data-page="logs">
+                    <i class="fas fa-history"></i>
+                    <span>Journaux d'erreurs</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" onclick="showPage('uptime'); return false;" data-page="uptime">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Uptime monitoring</span>
+                </a>
+
+                <div class="sidebar-nav-title">CONFIGURATION</div>
+                <a href="#" class="sidebar-nav-item" onclick="showPage('parametres'); return false;" data-page="parametres">
+                    <i class="fas fa-cog"></i>
+                    <span>Paramètres généraux</span>
+                </a>
+                <a href="#" class="sidebar-nav-item" onclick="showPage('utilisateurs'); return false;" data-page="utilisateurs">
+                    <i class="fas fa-users-cog"></i>
+                    <span>Utilisateurs</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <div class="main-content" id="mainContent">
+            <!-- ===== TOP BAR ADMIN ===== -->
+            <div class="admin-topbar">
+                <div class="admin-topbar-left">
+                    <button class="admin-menu-toggle" id="mobileMenuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="admin-search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="globalSearch" placeholder="Rechercher un site, une URL, un déploiement...">
+                    </div>
+                </div>
+                <div class="admin-topbar-right">
+                    <div class="admin-notification" onclick="showNotifications()">
+                        <i class="far fa-bell"></i>
+                        <span class="notification-badge">5</span>
+                    </div>
+                    <div class="admin-profile" onclick="showPage('profile');">
+                        <div class="admin-profile-avatar">KJ</div>
+                        <div class="admin-profile-info">
+                            <h4>Kouamé Jean</h4>
+                            <p>Webmaster</p>
+                        </div>
+                        <i class="fas fa-chevron-down" style="color: var(--grey);"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== DASHBOARD PAGE ===== -->
+            <div id="dashboard-page" class="page-content">
+                <!-- BREADCRUMB -->
+                <div class="breadcrumb">
+                    <a onclick="showPage('dashboard');">Dashboard</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Vue d'ensemble</span>
+                </div>
+
+                <!-- PAGE HEADER -->
+                <div class="page-header">
+                    <h1><i class="fas fa-tachometer-alt"></i> Dashboard Webmaster</h1>
+                    <div class="page-header-actions">
+                        <span style="color: var(--grey); background: var(--grey-light); padding: 8px 16px; border-radius: 50px; font-size: 0.85rem;">
+                            <i class="fas fa-calendar"></i> 12 mars 2026 • 14:32 GMT
+                        </span>
+                    </div>
+                </div>
+
+                <!-- STATS CARDS -->
+                <div class="stats-grid" id="dashboard-stats"></div>
+
+                <!-- SITES GRID -->
+                <h2 style="margin-bottom: 20px; color: var(--blue-ci);">Aperçu des sites</h2>
+                <div class="sites-grid" id="sites-overview-grid"></div>
+
+                <!-- ANALYTICS -->
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <div class="analytics-header">
+                            <span class="analytics-title">Trafic total (24h)</span>
+                            <span class="analytics-value">124.5K</span>
+                        </div>
+                        <div class="analytics-chart" id="trafficChart"></div>
+                    </div>
+                    <div class="analytics-card">
+                        <div class="analytics-header">
+                            <span class="analytics-title">Temps de réponse moyen</span>
+                            <span class="analytics-value">1.2s</span>
+                        </div>
+                        <div style="margin-top: 30px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>Portail inscriptions</span>
+                                <span style="font-weight: 700;">0.8s</span>
+                            </div>
+                            <div style="height: 8px; background: var(--grey-light); border-radius: 4px; margin-bottom: 20px;">
+                                <div style="width: 30%; height: 8px; background: var(--green-ci); border-radius: 4px;"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>API Gateway</span>
+                                <span style="font-weight: 700;">1.2s</span>
+                            </div>
+                            <div style="height: 8px; background: var(--grey-light); border-radius: 4px; margin-bottom: 20px;">
+                                <div style="width: 45%; height: 8px; background: var(--orange-ci); border-radius: 4px;"></div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span>Portail paiements</span>
+                                <span style="font-weight: 700;">1.5s</span>
+                            </div>
+                            <div style="height: 8px; background: var(--grey-light); border-radius: 4px;">
+                                <div style="width: 55%; height: 8px; background: var(--yellow); border-radius: 4px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DERNIERS DÉPLOIEMENTS -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <span class="table-title"><i class="fas fa-rocket"></i> Derniers déploiements</span>
+                        <div class="table-actions">
+                            <button class="btn-admin btn-admin-outline" onclick="openModal('modalDeploy')">
+                                <i class="fas fa-rocket"></i> Nouveau déploiement
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <table id="recentDeploymentsTable">
+                        <thead>
+                            <tr>
+                                <th>Site</th>
+                                <th>Version</th>
+                                <th>Environnement</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentDeploymentsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== SITES PAGE ===== -->
+            <div id="sites-page" class="page-content hidden">
+                <div class="breadcrumb">
+                    <a onclick="showPage('dashboard');">Dashboard</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Sites & portails</span>
+                </div>
+
+                <div class="page-header">
+                    <h1><i class="fas fa-globe"></i> Tous les sites</h1>
+                    <div class="page-header-actions">
+                        <button class="btn-admin btn-admin-outline" onclick="exportData('sites')">
+                            <i class="fas fa-download"></i> Exporter
+                        </button>
+                        <button class="btn-admin btn-admin-primary" onclick="openModal('modalAddSite')">
+                            <i class="fas fa-plus"></i> Ajouter un site
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filters-section">
+                    <div class="filter-group">
+                        <span class="filter-label">Environnement :</span>
+                        <select class="filter-select" id="siteEnvFilter">
+                            <option value="all">Tous</option>
+                            <option value="production">Production</option>
+                            <option value="staging">Staging</option>
+                            <option value="development">Développement</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">Statut :</span>
+                        <select class="filter-select" id="siteStatusFilter">
+                            <option value="all">Tous</option>
+                            <option value="actif">Actif</option>
+                            <option value="maintenance">Maintenance</option>
+                            <option value="inactif">Inactif</option>
+                        </select>
+                    </div>
+                    <button class="filter-btn" onclick="filterSites()">
+                        <i class="fas fa-sync-alt"></i> Appliquer
+                    </button>
+                </div>
+
+                <div class="sites-grid" id="all-sites-grid"></div>
+            </div>
+
+            <!-- ===== DÉPLOIEMENT PAGE ===== -->
+            <div id="deploiement-page" class="page-content hidden">
+                <div class="breadcrumb">
+                    <a onclick="showPage('dashboard');">Dashboard</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Déploiements</span>
+                </div>
+
+                <div class="page-header">
+                    <h1><i class="fas fa-rocket"></i> Gestion des déploiements</h1>
+                    <div class="page-header-actions">
+                        <button class="btn-admin btn-admin-primary" onclick="openModal('modalDeploy')">
+                            <i class="fas fa-rocket"></i> Nouveau déploiement
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-info">
+                            <h3>Déploiements réussis</h3>
+                            <div class="stat-number">142</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                        <div class="stat-info">
+                            <h3>En attente</h3>
+                            <div class="stat-number">2</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+                        <div class="stat-info">
+                            <h3>Échoués</h3>
+                            <div class="stat-number">3</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                        <div class="stat-info">
+                            <h3>Temps moyen</h3>
+                            <div class="stat-number">2.4m</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="deployment-grid" id="active-deployments"></div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <span class="table-title">Historique des déploiements</span>
+                    </div>
+                    <table id="deployments-table">
+                        <thead>
+                            <tr>
+                                <th>Site</th>
+                                <th>Version</th>
+                                <th>Environnement</th>
+                                <th>Date</th>
+                                <th>Durée</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deployments-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== DOMAINES PAGE ===== -->
+            <div id="domaines-page" class="page-content hidden">
+                <div class="breadcrumb">
+                    <a onclick="showPage('dashboard');">Dashboard</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Domaines & SSL</span>
+                </div>
+
+                <div class="page-header">
+                    <h1><i class="fas fa-globe-africa"></i> Domaines et certificats</h1>
+                    <div class="page-header-actions">
+                        <button class="btn-admin btn-admin-primary" onclick="alert('Ajouter un domaine')">
+                            <i class="fas fa-plus"></i> Ajouter un domaine
+                        </button>
+                    </div>
+                </div>
+
+                <div class="domains-grid" id="domains-grid"></div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <span class="table-title">Certificats SSL</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Domaine</th>
+                                <th>Émetteur</th>
+                                <th>Date d'expiration</th>
+                                <th>Jours restants</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>scolaris.ci</td>
+                                <td>Let's Encrypt</td>
+                                <td>15/06/2026</td>
+                                <td>95</td>
+                                <td><span class="status-badge status-active">Actif</span></td>
+                                <td><button class="action-btn action-view"><i class="fas fa-sync"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>api.scolaris.ci</td>
+                                <td>Let's Encrypt</td>
+                                <td>20/05/2026</td>
+                                <td>69</td>
+                                <td><span class="status-badge status-active">Actif</span></td>
+                                <td><button class="action-btn action-view"><i class="fas fa-sync"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>paiements.scolaris.ci</td>
+                                <td>Let's Encrypt</td>
+                                <td>10/04/2026</td>
+                                <td>29</td>
+                                <td><span class="status-badge status-warning">Expire bientôt</span></td>
+                                <td><button class="action-btn action-edit"><i class="fas fa-sync"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== TRAFIC PAGE ===== -->
+            <div id="trafic-page" class="page-content hidden">
+                <div class="breadcrumb">
+                    <a onclick="showPage('dashboard');">Dashboard</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Trafic & performance</span>
+                </div>
+
+                <div class="page-header">
+                    <h1><i class="fas fa-chart-line"></i> Analytics</h1>
+                    <div class="page-header-actions">
+                        <button class="btn-admin btn-admin-outline" onclick="exportData('analytics')">
+                            <i class="fas fa-download"></i> Exporter
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filters-section">
+                    <div class="filter-group">
+                        <span class="filter-label">Période :</span>
+                        <select class="filter-select" id="analyticsPeriod">
+                            <option value="24h">24 dernières heures</option>
+                            <option value="7d">7 derniers jours</option>
+                            <option value="30d">30 derniers jours</option>
+                            <option value="12m">12 derniers mois</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">Site :</span>
+                        <select class="filter-select" id="analyticsSite">
+                            <option value="all">Tous les sites</option>
+                            <option value="inscriptions">Portail inscriptions</option>
+                            <option value="paiements">Portail paiements</option>
+                            <option value="api">API Gateway</option>
+                        </select>
+                    </div>
+                    <button class="filter-btn" onclick="refreshAnalytics()">
+                        <i class="fas fa-sync-alt"></i> Actualiser
+                    </button>
+                </div>
+
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <div class="analytics-header">
+                            <span class="analytics-title">Visiteurs uniques</span>
+                            <span class="analytics-value">45.2K</span>
+                        </div>
+                        <div class="analytics-chart" id="visitors-chart"></div>
+                    </div>
+                    <div class="analytics-card">
+                        <div class="analytics-header">
+                            <span class="analytics-title">Pages vues</span>
+                            <span class="analytics-value">124.5K</span>
+                        </div>
+                        <div class="analytics-chart" id="pageviews-chart"></div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <span class="table-title">Top pages (24h)</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Page</th>
+                                <th>Site</th>
+                                <th>Vues</th>
+                                <th>Visiteurs uniques</th>
+                                <th>Temps moyen</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>/inscription</td><td>Portail inscriptions</td><td>12,450</td><td>8,230</td><td>2:45</td><td>28%</td></tr>
+                            <tr><td>/paiement</td><td>Portail paiements</td><td>8,900</td><td>6,120</td><td>1:58</td><td>20%</td></tr>
+                            <tr><td>/etablissements</td><td>Gestion établissements</td><td>5,670</td><td>3,450</td><td>3:12</td><td>13%</td></tr>
+                            <tr><td>/api/v1/payments</td><td>API Gateway</td><td>4,230</td><td>1,890</td><td>0:45</td><td>9%</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== LOGS PAGE ===== -->
+            <div id="logs-page" class="page-content hidden">
+                <div class="breadcrumb">
+                    <a onclick="showPage('dashboard');">Dashboard</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Journaux d'erreurs</span>
+                </div>
+
+                <div class="page-header">
+                    <h1><i class="fas fa-history"></i> Logs système</h1>
+                    <div class="page-header-actions">
+                        <button class="btn-admin btn-admin-outline" onclick="exportData('logs')">
+                            <i class="fas fa-download"></i> Exporter
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filters-section">
+                    <div class="filter-group">
+                        <span class="filter-label">Niveau :</span>
+                        <select class="filter-select">
+                            <option value="all">Tous</option>
+                            <option value="error">Erreurs</option>
+                            <option value="warning">Avertissements</option>
+                            <option value="info">Informations</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">Site :</span>
+                        <select class="filter-select">
+                            <option value="all">Tous les sites</option>
+                            <option value="inscriptions">Portail inscriptions</option>
+                            <option value="paiements">Portail paiements</option>
+                            <option value="api">API Gateway</option>
+                        </select>
+                    </div>
+                    <button class="filter-btn">
+                        <i class="fas fa-search"></i> Rechercher
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Horodatage</th>
+                                <th>Niveau</th>
+                                <th>Site</th>
+                                <th>Message</th>
+                                <th>IP</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2026-03-12 14:32:18</td>
+                                <td><span style="background: var(--red-light); color: var(--red); padding: 4px 12px; border-radius: 50px;">ERREUR</span></td>
+                                <td>API Gateway</td>
+                                <td>Timeout sur requête paiement #PAY-789-456</td>
+                                <td>197.23.45.67</td>
+                                <td><button class="action-btn action-view"><i class="fas fa-eye"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>2026-03-12 13:15:42</td>
+                                <td><span style="background: var(--yellow-light); color: var(--yellow); padding: 4px 12px; border-radius: 50px;">WARNING</span></td>
+                                <td>Portail inscriptions</td>
+                                <td>Tentative de connexion échouée - 3 essais</td>
+                                <td>154.67.89.12</td>
+                                <td><button class="action-btn action-view"><i class="fas fa-eye"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>2026-03-12 11:08:33</td>
+                                <td><span style="background: var(--green-ci-light); color: var(--green-ci); padding: 4px 12px; border-radius: 50px;">INFO</span></td>
+                                <td>Portail paiements</td>
+                                <td>Déploiement v2.1.5 réussi</td>
+                                <td>10.0.12.45</td>
+                                <td><button class="action-btn action-view"><i class="fas fa-eye"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ===== UPTIME PAGE ===== -->
+            <div id="uptime-page" class="page-content hidden">
+                <div class="breadcrumb">
+                    <a onclick="showPage('dashboard');">Dashboard</a>
+                    <i class="fas fa-chevron-right"></i>
+                    <span>Uptime monitoring</span>
+                </div>
+
+                <div class="page-header">
+                    <h1><i class="fas fa-check-circle"></i> Disponibilité des services</h1>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-check-circle" style="color: var(--green-ci);"></i></div>
+                        <div class="stat-info">
+                            <h3>Disponibilité globale</h3>
+                            <div class="stat-number">99.97%</div>
+                            <span style="color: var(--green-ci);">+0.02% vs mois dernier</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                        <div class="stat-info">
+                            <h3>Uptime (30j)</h3>
+                            <div class="stat-number">719h</div>
+                            <span style="color: var(--grey);">/ 720h</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div class="stat-info">
+                            <h3>Incidents (30j)</h3>
+                            <div class="stat-number">2</div>
+                            <span style="color: var(--grey);">Temps moyen: 15min</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="stat-info">
+                            <h3>Prochain objectif</h3>
+                            <div class="stat-number">99.99%</div>
+                            <span style="color: var(--grey);">SLI cible</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <span class="table-title">Statut des services</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Site</th>
+                                <th>URL</th>
+                                <th>Uptime 30j</th>
+                                <th>Temps réponse</th>
+                                <th>Dernier incident</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Portail inscriptions</td>
+                                <td>inscriptions.scolaris.ci</td>
+                                <td>100%</td>
+                                <td>0.8s</td>
+                                <td>-</td>
+                                <td><span class="status-badge status-active">Opérationnel</span></td>
+                                <td><button class="action-btn action-view"><i class="fas fa-eye"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>Portail paiements</td>
+                                <td>paiements.scolaris.ci</td>
+                                <td>99.95%</td>
+                                <td>1.5s</td>
+                                <td>05/03/2026</td>
+                                <td><span class="status-badge status-active">Opérationnel</span></td>
+                                <td><button class="action-btn action-view"><i class="fas fa-eye"></i></button></td>
+                            </tr>
+                            <tr>
+                                <td>API Gateway</td>
+                                <td>api.scolaris.ci</td>
+                                <td>99.98%</td>
+                                <td>1.2s</td>
+                                <td>01/03/2026</td>
+                                <td><span class="status-badge status-active">Opérationnel</span></td>
+                                <td><button class="action-btn action-view"><i class="fas fa-eye"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== DONNÉES DES SITES ====================
+        const sitesData = [
+            {
+                id: 1,
+                nom: 'Portail inscriptions',
+                url: 'https://inscriptions.scolaris.ci',
+                environnement: 'production',
+                version: 'v2.1.0',
+                statut: 'Actif',
+                technologie: 'React',
+                visites: '45.2K',
+                tempsReponse: '0.8s',
+                uptime: '99.99%',
+                description: 'Portail d\'inscription scolaire pour les parents et élèves'
+            },
+            {
+                id: 2,
+                nom: 'Portail paiements',
+                url: 'https://paiements.scolaris.ci',
+                environnement: 'production',
+                version: 'v2.0.5',
+                statut: 'Actif',
+                technologie: 'Node.js',
+                visites: '38.7K',
+                tempsReponse: '1.5s',
+                uptime: '99.95%',
+                description: 'Plateforme de paiement des frais scolaires'
+            },
+            {
+                id: 3,
+                nom: 'Gestion établissements',
+                url: 'https://admin.scolaris.ci',
+                environnement: 'production',
+                version: 'v1.5.2',
+                statut: 'Actif',
+                technologie: 'Laravel',
+                visites: '12.3K',
+                tempsReponse: '1.1s',
+                uptime: '99.98%',
+                description: 'Interface d\'administration des établissements'
+            },
+            {
+                id: 4,
+                nom: 'API Gateway',
+                url: 'https://api.scolaris.ci',
+                environnement: 'production',
+                version: 'v3.2.1',
+                statut: 'Actif',
+                technologie: 'Node.js',
+                visites: '28.1K',
+                tempsReponse: '1.2s',
+                uptime: '99.98%',
+                description: 'Point d\'entrée unique pour toutes les APIs'
+            },
+            {
+                id: 5,
+                nom: 'Interface Admin',
+                url: 'https://admin.scolaris.ci/dashboard',
+                environnement: 'production',
+                version: 'v2.3.4',
+                statut: 'Actif',
+                technologie: 'React',
+                visites: '5.2K',
+                tempsReponse: '0.9s',
+                uptime: '100%',
+                description: 'Tableau de bord administrateur'
+            },
+            {
+                id: 6,
+                nom: 'Portail support',
+                url: 'https://support.scolaris.ci',
+                environnement: 'staging',
+                version: 'v1.2.0',
+                statut: 'Maintenance',
+                technologie: 'Vue.js',
+                visites: '0',
+                tempsReponse: '2.1s',
+                uptime: '95.2%',
+                description: 'Centre d\'aide et support technique'
+            }
+        ];
+
+        const deploymentsData = [
+            { site: 'API Gateway', version: 'v3.2.1', env: 'production', date: '2026-03-11 14:32', duree: '2.3m', statut: 'Réussi' },
+            { site: 'Portail paiements', version: 'v2.0.5', env: 'production', date: '2026-03-10 09:15', duree: '3.1m', statut: 'Réussi' },
+            { site: 'Portail inscriptions', version: 'v2.1.0', env: 'production', date: '2026-03-09 11:45', duree: '2.8m', statut: 'Réussi' },
+            { site: 'Interface Admin', version: 'v2.3.4', env: 'staging', date: '2026-03-08 16:20', duree: '1.9m', statut: 'Réussi' },
+            { site: 'Portail support', version: 'v1.2.0', env: 'staging', date: '2026-03-07 10:00', duree: '4.2m', statut: 'Échoué' }
+        ];
+
+        const domainsData = [
+            { nom: 'scolaris.ci', site: 'Portail principal', expiry: '15/06/2026', ssl: 'Let\'s Encrypt', jours: 95 },
+            { nom: 'inscriptions.scolaris.ci', site: 'Portail inscriptions', expiry: '15/06/2026', ssl: 'Let\'s Encrypt', jours: 95 },
+            { nom: 'paiements.scolaris.ci', site: 'Portail paiements', expiry: '10/04/2026', ssl: 'Let\'s Encrypt', jours: 29 },
+            { nom: 'api.scolaris.ci', site: 'API Gateway', expiry: '20/05/2026', ssl: 'Let\'s Encrypt', jours: 69 },
+            { nom: 'admin.scolaris.ci', site: 'Interface Admin', expiry: '15/06/2026', ssl: 'Let\'s Encrypt', jours: 95 }
+        ];
+
+        // ==================== FONCTIONS DE NAVIGATION ====================
+        function showPage(pageName) {
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            const pageElement = document.getElementById(`${pageName}-page`);
+            if (pageElement) {
+                pageElement.classList.remove('hidden');
+            }
+            
+            document.querySelectorAll('.sidebar-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            const activeItem = document.querySelector(`.sidebar-nav-item[data-page="${pageName}"]`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+            }
+            
+            // Charger les données selon la page
+            switch(pageName) {
+                case 'dashboard':
+                    loadDashboardData();
+                    break;
+                case 'sites':
+                    loadAllSites();
+                    break;
+                case 'deploiement':
+                    loadDeployments();
+                    break;
+                case 'domaines':
+                    loadDomains();
+                    break;
+            }
+        }
+
+        // ==================== FONCTIONS DE CHARGEMENT ====================
+        function loadDashboardData() {
+            // Stats cards
+            const statsContainer = document.getElementById('dashboard-stats');
+            if (statsContainer) {
+                const activeSites = sitesData.filter(s => s.statut === 'Actif').length;
+                const prodSites = sitesData.filter(s => s.environnement === 'production').length;
+                
+                statsContainer.innerHTML = `
+                    <div class="stat-card" onclick="showPage('sites');">
+                        <div class="stat-icon"><i class="fas fa-globe"></i></div>
+                        <div class="stat-info">
+                            <h3>Sites actifs</h3>
+                            <div class="stat-number">${activeSites}</div>
+                            <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> +2 cette année</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" onclick="showPage('deploiement');">
+                        <div class="stat-icon"><i class="fas fa-rocket"></i></div>
+                        <div class="stat-info">
+                            <h3>Déploiements</h3>
+                            <div class="stat-number">142</div>
+                            <div class="stat-trend trend-up"><i class="fas fa-check-circle"></i> 98% réussis</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" onclick="showPage('domaines');">
+                        <div class="stat-icon"><i class="fas fa-globe-africa"></i></div>
+                        <div class="stat-info">
+                            <h3>Domaines</h3>
+                            <div class="stat-number">${domainsData.length}</div>
+                            <div class="stat-trend trend-down"><i class="fas fa-exclamation-triangle"></i> 1 expire bientôt</div>
+                        </div>
+                    </div>
+                    <div class="stat-card" onclick="showPage('uptime');">
+                        <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-info">
+                            <h3>Uptime global</h3>
+                            <div class="stat-number">99.97%</div>
+                            <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> +0.02%</div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Aperçu des sites
+            const overviewGrid = document.getElementById('sites-overview-grid');
+            if (overviewGrid) {
+                overviewGrid.innerHTML = sitesData.slice(0, 3).map(site => `
+                    <div class="site-card" onclick="viewSiteDetails('${site.nom}')">
+                        <span class="site-badge ${site.environnement === 'production' ? 'badge-production' : 'badge-staging'}">${site.environnement}</span>
+                        <div class="site-header">
+                            <div class="site-icon">
+                                <i class="${getSiteIcon(site.technologie)}"></i>
+                            </div>
+                            <div class="site-info">
+                                <h3>${site.nom}</h3>
+                                <div class="site-url"><i class="fas fa-link"></i> ${site.url}</div>
+                                <span class="site-status status-badge status-active">${site.statut}</span>
+                            </div>
+                        </div>
+                        <div class="site-stats">
+                            <div class="site-stat">
+                                <div class="site-stat-value">${site.visites}</div>
+                                <div class="site-stat-label">Visites/24h</div>
+                            </div>
+                            <div class="site-stat">
+                                <div class="site-stat-value">${site.tempsReponse}</div>
+                                <div class="site-stat-label">Temps réponse</div>
+                            </div>
+                            <div class="site-stat">
+                                <div class="site-stat-value">${site.uptime}</div>
+                                <div class="site-stat-label">Uptime</div>
+                            </div>
+                        </div>
+                        <div class="site-footer">
+                            <span style="color: var(--grey); font-size: 0.85rem;"><i class="fas fa-code-branch"></i> ${site.version}</span>
+                            <div class="site-actions">
+                                <button class="action-btn action-view" onclick="viewSiteDetails('${site.nom}'); event.stopPropagation();"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn action-edit" onclick="openModal('modalSiteConfig'); event.stopPropagation();"><i class="fas fa-cog"></i></button>
+                                <button class="action-btn action-deploy" onclick="openModal('modalDeploy'); event.stopPropagation();"><i class="fas fa-rocket"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Graphique trafic
+            const trafficChart = document.getElementById('trafficChart');
+            if (trafficChart) {
+                const hours = ['00h', '04h', '08h', '12h', '16h', '20h'];
+                const values = [4500, 3200, 8900, 12400, 15600, 9800];
+                trafficChart.innerHTML = '';
+                
+                hours.forEach((hour, index) => {
+                    const barHeight = values[index] / 150;
+                    trafficChart.innerHTML += `
+                        <div class="chart-bar-container">
+                            <div class="chart-bar" style="height: ${barHeight}px; background: ${barHeight > 80 ? 'var(--orange-ci)' : 'var(--blue-ci)'};"></div>
+                            <span class="chart-label">${hour}</span>
+                        </div>
+                    `;
+                });
+            }
+            
+            // Derniers déploiements
+            const deploymentsBody = document.getElementById('recentDeploymentsBody');
+            if (deploymentsBody) {
+                deploymentsBody.innerHTML = deploymentsData.slice(0, 3).map(d => `
+                    <tr>
+                        <td><span style="font-weight: 600;">${d.site}</span></td>
+                        <td><span style="background: var(--purple-light); padding: 4px 12px; border-radius: 50px; font-size: 0.75rem;">${d.version}</span></td>
+                        <td><span class="status-badge ${d.env === 'production' ? 'status-active' : 'status-pending'}">${d.env}</span></td>
+                        <td>${d.date}</td>
+                        <td><span class="status-badge ${d.statut === 'Réussi' ? 'status-paid' : 'status-cancelled'}">${d.statut}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn action-view" onclick="alert('Détails du déploiement ${d.version}')"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn action-backup" onclick="openModal('modalBackup')"><i class="fas fa-database"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function loadAllSites() {
+            const grid = document.getElementById('all-sites-grid');
+            if (grid) {
+                grid.innerHTML = sitesData.map(site => `
+                    <div class="site-card">
+                        <span class="site-badge ${site.environnement === 'production' ? 'badge-production' : site.environnement === 'staging' ? 'badge-staging' : 'badge-maintenance'}">${site.environnement}</span>
+                        <div class="site-header">
+                            <div class="site-icon">
+                                <i class="${getSiteIcon(site.technologie)}"></i>
+                            </div>
+                            <div class="site-info">
+                                <h3>${site.nom}</h3>
+                                <div class="site-url"><i class="fas fa-link"></i> ${site.url}</div>
+                                <span class="site-status status-badge ${site.statut === 'Actif' ? 'status-active' : 'status-pending'}">${site.statut}</span>
+                            </div>
+                        </div>
+                        <p style="color: var(--grey); margin: 15px 0; font-size: 0.95rem;">${site.description}</p>
+                        <div class="site-stats">
+                            <div class="site-stat">
+                                <div class="site-stat-value">${site.visites}</div>
+                                <div class="site-stat-label">Visites/24h</div>
+                            </div>
+                            <div class="site-stat">
+                                <div class="site-stat-value">${site.tempsReponse}</div>
+                                <div class="site-stat-label">Temps réponse</div>
+                            </div>
+                            <div class="site-stat">
+                                <div class="site-stat-value">${site.uptime}</div>
+                                <div class="site-stat-label">Uptime</div>
+                            </div>
+                        </div>
+                        <div class="site-footer">
+                            <div>
+                                <span style="color: var(--grey); font-size: 0.85rem;"><i class="fas fa-code-branch"></i> ${site.version}</span>
+                                <span style="color: var(--grey); font-size: 0.85rem; margin-left: 15px;"><i class="fas fa-microchip"></i> ${site.technologie}</span>
+                            </div>
+                            <div class="site-actions">
+                                <button class="action-btn action-view" onclick="viewSiteDetails('${site.nom}')"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn action-edit" onclick="openModal('modalSiteConfig')"><i class="fas fa-cog"></i></button>
+                                <button class="action-btn action-deploy" onclick="openModal('modalDeploy')"><i class="fas fa-rocket"></i></button>
+                                <button class="action-btn action-backup" onclick="openModal('modalBackup')"><i class="fas fa-database"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function loadDeployments() {
+            const activeContainer = document.getElementById('active-deployments');
+            if (activeContainer) {
+                activeContainer.innerHTML = `
+                    <div class="deployment-card">
+                        <div class="deployment-header">
+                            <div class="deployment-icon">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="deployment-info">
+                                <h4>API Gateway</h4>
+                                <div class="deployment-date">Déploiement en cours • 45%</div>
+                            </div>
+                        </div>
+                        <div class="deployment-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 45%;"></div>
+                            </div>
+                            <div class="progress-stats">
+                                <span>v3.2.2</span>
+                                <span>2m 30s restantes</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="deployment-card">
+                        <div class="deployment-header">
+                            <div class="deployment-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="deployment-info">
+                                <h4>Portail paiements</h4>
+                                <div class="deployment-date">Planifié • 15:30 GMT</div>
+                            </div>
+                        </div>
+                        <div class="deployment-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 0%; background: var(--yellow);"></div>
+                            </div>
+                            <div class="progress-stats">
+                                <span>v2.0.6</span>
+                                <span>En attente</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            const tableBody = document.getElementById('deployments-body');
+            if (tableBody) {
+                tableBody.innerHTML = deploymentsData.map(d => `
+                    <tr>
+                        <td><span style="font-weight: 600;">${d.site}</span></td>
+                        <td><span style="background: var(--purple-light); padding: 4px 12px; border-radius: 50px;">${d.version}</span></td>
+                        <td><span class="status-badge ${d.env === 'production' ? 'status-active' : 'status-pending'}">${d.env}</span></td>
+                        <td>${d.date}</td>
+                        <td>${d.duree}</td>
+                        <td><span class="status-badge ${d.statut === 'Réussi' ? 'status-paid' : 'status-cancelled'}">${d.statut}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn action-view"><i class="fas fa-eye"></i></button>
+                                <button class="action-btn action-backup" onclick="openModal('modalBackup')"><i class="fas fa-database"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        function loadDomains() {
+            const grid = document.getElementById('domains-grid');
+            if (grid) {
+                grid.innerHTML = domainsData.map(d => `
+                    <div class="domain-card">
+                        <div class="domain-icon">
+                            <i class="fas fa-globe"></i>
+                        </div>
+                        <div class="domain-info">
+                            <div class="domain-name">${d.nom}</div>
+                            <div class="domain-expiry">Site: ${d.site} • Expire le ${d.expiry}</div>
+                            <span class="domain-ssl">${d.ssl} • ${d.jours} jours restants</span>
+                        </div>
+                        <button class="action-btn action-view" style="background: var(--teal);" onclick="alert('Renouveler le certificat')"><i class="fas fa-sync"></i></button>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // ==================== FONCTIONS UTILITAIRES ====================
+        function getSiteIcon(tech) {
+            const icons = {
+                'React': 'fab fa-react',
+                'Vue.js': 'fab fa-vuejs',
+                'Angular': 'fab fa-angular',
+                'Laravel': 'fab fa-laravel',
+                'Django': 'fab fa-python',
+                'Node.js': 'fab fa-node-js'
+            };
+            return icons[tech] || 'fas fa-code';
+        }
+
+        function viewSiteDetails(siteName) {
+            const site = sitesData.find(s => s.nom === siteName);
+            if (site) {
+                showToast('Détails du site', `${site.nom} - ${site.url}\nVersion: ${site.version}\nTechnologie: ${site.technologie}`, true);
+            }
+        }
+
+        // ==================== FONCTIONS D'ACTION ====================
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showToast(title, message, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            const toastTitle = document.getElementById('toastTitle');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.querySelector('.toast-icon');
+            
+            toastTitle.innerText = title;
+            toastMessage.innerText = message;
+            
+            if (isSuccess) {
+                toastIcon.style.background = 'var(--green-ci-light)';
+                toastIcon.style.color = 'var(--green-ci)';
+                toastIcon.innerHTML = '<i class="fas fa-check"></i>';
+            } else {
+                toastIcon.style.background = 'var(--red-light)';
+                toastIcon.style.color = 'var(--red)';
+                toastIcon.innerHTML = '<i class="fas fa-exclamation"></i>';
+            }
+            
+            toast.classList.add('active');
+            setTimeout(() => toast.classList.remove('active'), 3000);
+        }
+
+        function filterSites() {
+            showToast('Filtres appliqués', 'Liste des sites filtrée', true);
+        }
+
+        function exportData(type) {
+            showToast('Export en cours', `Données ${type} exportées avec succès`, true);
+        }
+
+        function showNotifications() {
+            showToast('Notifications', '5 notifications non lues', false);
+        }
+
+        function refreshAnalytics() {
+            showToast('Analytics', 'Données actualisées', true);
+        }
+
+        // ==================== GESTION DES FORMULAIRES ====================
+        document.getElementById('formAddSite')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            closeModal('modalAddSite');
+            showToast('Site ajouté', 'Le nouveau site a été créé avec succès', true);
+        });
+
+        document.getElementById('formSiteConfig')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            closeModal('modalSiteConfig');
+            showToast('Configuration enregistrée', 'Les paramètres du site ont été mis à jour', true);
+        });
+
+        document.getElementById('formDeploy')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            closeModal('modalDeploy');
+            showToast('Déploiement lancé', 'Le déploiement a démarré avec succès', true);
+        });
+
+        document.getElementById('formBackup')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            closeModal('modalBackup');
+            showToast('Sauvegarde en cours', 'La sauvegarde a été lancée', true);
+        });
+
+        // ==================== RECHERCHE GLOBALE ====================
+        document.getElementById('globalSearch')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const query = this.value;
+                const results = sitesData.filter(s => 
+                    s.nom.toLowerCase().includes(query.toLowerCase()) || 
+                    s.url.includes(query)
+                ).length;
+                showToast('Recherche', `${results} résultat(s) trouvé(s)`, true);
+            }
+        });
+
+        // ==================== SIDEBAR TOGGLE ====================
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('mainContent');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        
+        sidebarToggle?.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+            
+            const icon = this.querySelector('i');
+            if (sidebar.classList.contains('collapsed')) {
+                icon.classList.remove('fa-chevron-left');
+                icon.classList.add('fa-chevron-right');
+            } else {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-left');
+            }
+        });
+        
+        mobileMenuToggle?.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+        });
+        
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 992) {
+                if (!sidebar.contains(event.target) && !mobileMenuToggle?.contains(event.target)) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+        
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        });
+
+        // ==================== INITIALISATION ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            showPage('dashboard');
+        });
+    </script>
+</body>
+</html>
